@@ -1,4 +1,4 @@
-import os, argparse, torch
+import argparse, torch
 import pandas as pd
 from pathlib import Path
 from torch.utils.data import Dataset
@@ -7,8 +7,8 @@ from torch.utils.data import ChainDataset
 def parse_arguments():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(description='Preprocess data for SER')
-    parser.add_argument('-i', '--input_dir', type=str, default='../dataset', help='Path to the raw dataset')
-    parser.add_argument('-o', '--output_dir', type=str, default='./data', help='Path to save the preprocessed data')
+    parser.add_argument('-i', '--input_dir', type=str, default='../../data', help='Path to the raw dataset')
+    parser.add_argument('-o', '--output_dir', type=str, default='./output', help='Path to save the preprocessed data')
     return parser.parse_args()
 
 class SERDataset(Dataset):
@@ -20,8 +20,10 @@ class SERDataset(Dataset):
     """
 
     def __init__(self, data):
+        self.idx = data['idx']
         self.valence = data['valence']
         self.activation = data['activation']
+        self.emotion = data['emotion']
         self.features = data['features']
 
     def __len__(self):
@@ -29,8 +31,10 @@ class SERDataset(Dataset):
 
     def __getitem__(self, idx):
         sample = {
+            'idx': self.idx[idx],
             'valence': self.valence[idx],
             'activation': self.activation[idx],
+            'emotion': self.emotion[idx],
             'features': torch.FloatTensor(self.features[idx])
         }
         return sample
@@ -46,11 +50,17 @@ def main():
     # Load training data
     ser_train = pd.read_json(f"{input_dir}/train.json")
     ser_train = ser_train.transpose()
+    ser_train['emotion'] = ser_train['valence'].astype(int) * 2 + ser_train['activation'].astype(int)
+    ser_train = ser_train.reset_index()
+    ser_train = ser_train.rename(columns={'index': 'idx'})
 
     # Load dev data
     ser_dev = pd.read_json(f"{input_dir}/dev.json")
     ser_dev = ser_dev.transpose()
     ser_dev = ser_dev[['valence', 'activation', 'features']]
+    ser_dev['emotion'] = ser_dev['valence'].astype(int) * 2 + ser_dev['activation'].astype(int)
+    ser_dev = ser_dev.reset_index()
+    ser_dev = ser_dev.rename(columns={'index': 'idx'})
 
     # Load test data for submission test (ser_test_1.json)
     ser_test_1 = pd.read_json(f"{input_dir}/ser_test_1.json")
@@ -58,6 +68,9 @@ def main():
     # Add a placehoder -1 for valence and activation
     ser_test_1.insert(0, 'valence', -1)
     ser_test_1.insert(1, 'activation', -1)
+    ser_test_1.insert(3, 'emotion', -1)
+    ser_test_1 = ser_test_1.reset_index()
+    ser_test_1 = ser_test_1.rename(columns={'index': 'idx'})
 
     # Instantiate the Dataset object for train and dev splits.
     train_set = SERDataset(ser_train)
