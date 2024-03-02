@@ -110,7 +110,7 @@ def train_loop(dataloader,
             loss, current = loss.item(), idx * idx + len(X)
             print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
             
-    return losses
+    # return losses
 
 
 def test_loop(dataloader, model, loss_fn):
@@ -141,7 +141,7 @@ def test_loop(dataloader, model, loss_fn):
     # Print test error
     print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg validation loss: {test_loss:>8f} \n")
     
-    return losses
+    # return losses
 
 
 def main():
@@ -224,19 +224,21 @@ def main():
 
     for t in range(args.num_epochs):
         print(f"Epoch {t+1}\n-------------------------------")
-        train_losses = train_loop(dataloader=train_loader, 
-                                #   model=averaged_model, 
-                                model=model, 
-                                loss_fn=loss_fn, 
-                                optimizer=optimizer, 
-                                scheduler=scheduler3
-                                )
+        train_loop(
+            dataloader=train_loader, 
+            # model=averaged_model, 
+            model=model, 
+            loss_fn=loss_fn, 
+            optimizer=optimizer, 
+            scheduler=scheduler3
+            )
         
-        val_losses = test_loop(dataloader=dev_loader, 
-                            #    model=averaged_model, 
-                               model=model, 
-                               loss_fn=loss_fn
-                               )
+        val_losses = test_loop(
+            dataloader=dev_loader, 
+            # model=averaged_model, 
+            model=model, 
+            loss_fn=loss_fn
+            )
                             
     print("Done!")
     # writer.close()
