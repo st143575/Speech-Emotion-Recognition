@@ -45,16 +45,16 @@ python train.py -i ./data_preprocessing/output --dataset_fn dataset.pt -o /model
 - ```-lr```, ```--learning_rate```: Learning rate.
 - ```-wd```, ```--weight_decay```: Weight decay.
 
-## Evaluation
+## Inference
 
 In ```/src```, run:
 ```bash
-python evaluate.py -i ./data_preprocessing/output -o <output_fn> -m <model_fn> --mode <mode>
+python inference.py -i ./data_preprocessing/output -o <output_fn> -m <model_fn> --mode <mode>
 ```
 
 - ```-i```, ```--input_dir```: Path to the model checkpoint.
 - ```-o```, ```--output_fn```: Path + file name of the predictions.
-- ```--mode```: Whether the evaluation is done on ser_test_1.json ('test') or ser_test_2.json ('final'), can be either "test" or "final".
+- ```--mode```: Whether the inference is done on ser_test_1.json ('test') or ser_test_2.json ('final'), can be either "test" or "final".
 
 ## Reference
 Ashkan Yazdani, Evangelos Skodras, Nikolaos Fakotakis, and Touradj Ebrahimi. Multimedia content analysis for emotional characterization of music video clips. *EURASIP Journal on Image and Video Processing*, 2013(1):1–10, 2013.
