@@ -4,16 +4,16 @@ Introduction to Deep Learning in Speech \& Language Processing (WS23/24) Coding 
 
 ## Setup
 
-*Prerequisite:*
+Prerequisite:
 - python 3.11
 - cuda 12
 
-*Install packages:*
+Install packages:
 ```bash
   pip install -r requirements.txt
   ```
 
-*Data Preparation:*
+Data Preparation:
 - Download the datasets ```train.json```, ```dev.json```, ```ser_test_1.json``` and ```ser_test_2.json``` to ```/dataset```.
 
 ## Data Preprocessing
