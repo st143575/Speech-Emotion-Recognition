@@ -13,7 +13,8 @@ def parse_arguments():
 
 class SERDataset(Dataset):
     """
-    Create a Dataset object from ser_train, ser_dev and ser_test_1.
+    Create a Dataset object from the input raw dataset.
+    The resulting dataset should contain the following columns: ['idx', 'valence', 'activation', 'emotion', 'features'].
 
     Args:
         data (pandas.DataFrame): ['valece', 'activation', 'features'].
@@ -44,7 +45,7 @@ def main():
     input_dir = Path(args.input_dir)
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-    print("Input directory: ", input_dir, "\n")
+    print("Input directory: ", input_dir)
     print("Output directory: ", output_dir)
     
     # Load training data
@@ -65,27 +66,40 @@ def main():
     # Load test data for submission test (ser_test_1.json)
     ser_test_1 = pd.read_json(f"{input_dir}/ser_test_1.json")
     ser_test_1 = ser_test_1.transpose()
-    # Add a placehoder -1 for valence and activation
+    # Add a placehoder -1 for valence, activation and emotion
     ser_test_1.insert(0, 'valence', -1)
     ser_test_1.insert(1, 'activation', -1)
     ser_test_1.insert(3, 'emotion', -1)
     ser_test_1 = ser_test_1.reset_index()
     ser_test_1 = ser_test_1.rename(columns={'index': 'idx'})
 
+    # Load test data for final submission (ser_test_2.json)
+    ser_test_2 = pd.read_json(f"{input_dir}/ser_test_2.json")
+    ser_test_2 = ser_test_2.transpose()
+    # Add a placehoder -1 for valence, activation and emotion
+    ser_test_2.insert(0, 'valence', -1)
+    ser_test_2.insert(1, 'activation', -1)
+    ser_test_2.insert(3, 'emotion', -1)
+    ser_test_2 = ser_test_2.rename(columns={'id': 'idx'})
+    ser_test_2 = ser_test_2.reindex(columns=['idx', 'valence', 'activation', 'features', 'emotion'])
+
     # Instantiate the Dataset object for train and dev splits.
     train_set = SERDataset(ser_train)
     dev_set = SERDataset(ser_dev)
     test_set_1 = SERDataset(ser_test_1)
+    test_set_2 = SERDataset(ser_test_2)
 
     # print('train:\n', train_set.__getitem__(0), '\n')
     # print('dev:\n', dev_set.__getitem__(0), '\n')
-    # print('test:\n', test_set_1.__getitem__(0), '\n')
+    # print('ser_test_1:\n', test_set_1.__getitem__(0), '\n')
+    # print('ser_test_2:\n', test_set_2.__getitem__(0), '\n')
 
-    merged_set = ChainDataset([train_set, dev_set, test_set_1])
+    merged_set = ChainDataset([train_set, dev_set, test_set_1, test_set_2])
     dataset = {
         'train': train_set, 
         'dev': dev_set, 
-        'test': test_set_1,
+        'test_1': test_set_1,
+        'test_2': test_set_2,
         }
 
     # Save dataset to disk

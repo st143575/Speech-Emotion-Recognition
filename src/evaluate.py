@@ -11,10 +11,6 @@ from data_preprocessing.preprocess import SERDataset
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print("Device: ", device)
 
-random.seed(2048)
-torch.manual_seed(2048)
-np.random.seed(2048)
-
 
 def parse_arguments():
     """Parse command line arguments."""
@@ -22,6 +18,7 @@ def parse_arguments():
     parser.add_argument('-i', '--input_dir', type=str, default='./data_preprocessing/output', help='Path to the pretrained model')
     parser.add_argument('-o', '--output_fn', type=str, help='Path + file name of the predictions')
     parser.add_argument('-m', '--model_fn', type=str, help='Path + file name of the pretrained model')
+    arser.add_argument('--mode', type=str, choices=['test', 'final'], help="Whether the evaluation is done on ser_test_1.json ('test') or ser_test_2.json ('final')")
     return parser.parse_args()
 
 
@@ -32,9 +29,10 @@ def custom_collate_fn(batch):
     activation = [item['activation'] for item in batch]
     emotion = [item['emotion'] for item in batch]
     
-    # Zero-padding on features
+    # Apply zero-padding to features
     padded_features = pad_sequence(features, batch_first=True, padding_value=0)
     
+    # Convert the emotion list to a LongTensor (64-bit integer)
     #valence = torch.tensor(valence, dtype=torch.long)
     #activation = torch.tensor(activation, dtype=torch.long)
     emotion = torch.tensor(emotion, dtype=torch.long)
@@ -48,7 +46,7 @@ def custom_collate_fn(batch):
         }
 
 
-def test_loop(dataloader, model):
+def predict(dataloader, model):
     size = len(dataloader.dataset)
     print("Test set size:", size)
     
@@ -82,10 +80,17 @@ def test_loop(dataloader, model):
     return indexes, y_pred_emotion_labels
 
 
-def postprocess(indexes, y_pred_emotion_labels):
+def postprocess(indexes: list, y_pred_emotion_labels: list):
     """
     Post-processing of the model prediction.
     Map the 1-dimensional emotion label bach to the two-dimensional (valence, activation) label.
+
+    Args:
+        indexes (list): List of indexes of the test samples.
+        y_pred_emotion_labels (list): List of predicted emotion labels.
+
+    Returns:
+        output (dict): A dictionary with the test sample indexes as keys and the corresponding (valence, activation) labels as values.
     """
     
     # Map the emotion label to valence and activation labels.
@@ -107,21 +112,27 @@ def main():
     input_dir = Path(args.input_dir)
     output_fn = Path(args.output_fn)
     model_fn = Path(args.model_fn)
+    mode = args.mode
     print("Input directory:", input_dir, "\n")
     print("Output fiele name:", output_fn, "\n")
     print("Model:", model_fn)
+    print("Mode:", mode)
     
     # Load preprocessed dataset
     dataset = torch.load(f"{input_dir}/dataset.pt")
     
     # Load test data
-    test_loader = DataLoader(dataset['test'], batch_size=1, shuffle=True, collate_fn=custom_collate_fn)
+    if mode == 'test':
+        test_loader = DataLoader(dataset['test_1'], batch_size=1, shuffle=False, collate_fn=custom_collate_fn)
+    elif mode == 'final':
+        test_loader = DataLoader(dataset['test_2'], batch_size=1, shuffle=False, collate_fn=custom_collate_fn)
     
     # Load pre-trained model
     model = torch.load(f"{model_fn}")
     
     # Do inference and get model outputs
-    indexes, y_preds_emotion = test_loop(test_loader, model)
+    print("Evaluation starts...")
+    indexes, y_preds_emotion = predict(test_loader, model)
     
     # Post-process model outputs
     output = postprocess(indexes, y_preds_emotion)
