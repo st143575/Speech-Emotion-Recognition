@@ -6,7 +6,7 @@ Introduction to Deep Learning in Speech \& Language Processing (WS23/24) Coding 
 
 Prerequisite:
 - python 3.11
-- cuda 12
+- cuda 12.3
 
 Install packages:
 ```bash
