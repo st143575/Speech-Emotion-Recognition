@@ -38,7 +38,7 @@ def parse_arguments():
     parser.add_argument('--num_heads', type=int, default=2, help='Number of attention heads')
     parser.add_argument('--num_encoder_layers', type=int, default=4, help='Number of encoder layers')
     parser.add_argument('--num_classes', type=int, default=4, help='Number of classes')
-    parser.add_argument('--pos_enc', type=bool, default=True, choices=[True, False], help='Whether adding positional encoding to the input features')
+    parser.add_argument('--pos_enc', action='store_true', default=False, help='Whether adding positional encoding to the input features')
     parser.add_argument('-e', '--num_epochs', type=int, default=10, help='Number of epochs')
     parser.add_argument('-bs', '--batch_size', type=int, default=64, help='Batch size')
     parser.add_argument('-lr', '--learning_rate', type=float, default=5e-2, help='Learning rate')
