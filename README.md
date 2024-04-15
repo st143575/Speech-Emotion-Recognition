@@ -29,7 +29,7 @@ python preprocess.py -i ../dataset -o ./output
 
 In ```/src```, run:
 ```bash
-python train.py -i ./data_preprocessing/output --dataset_fn dataset.pt -o /model_ckpts --input_size 26 --num_heads 2 --num_encoder_layers 4 --num_classes 4 --pos_enc True -e 10 -bs 64 -lr 5e-2 -wd 0.01
+python train.py -i ./data_preprocessing/output --dataset_fn dataset.pt -o /model_ckpts --input_size 26 --num_heads 2 --num_encoder_layers 4 --num_classes 4 --pos_enc -e 10 -bs 64 -lr 5e-2 -wd 0.01
 ```
 
 - ```-i```, ```--input_dir```: Path to the preprocessed dataset.
